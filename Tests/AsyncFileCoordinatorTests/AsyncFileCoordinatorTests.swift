@@ -5,7 +5,12 @@ final class AsyncFileCoordinatorTests: XCTestCase {
     
     class NSFileCoordinatorStub: NSFileCoordinator {
         override func coordinate(writingItemAt url: URL, options: NSFileCoordinator.WritingOptions = [], error outError: NSErrorPointer, byAccessor writer: (URL) -> Void) {
-            let error = NSError(domain: NSCocoaErrorDomain, code: NSFileWriteOutOfSpaceError, userInfo: nil)
+            let error = NSError(domain: NSCocoaErrorDomain, code: NSFileWriteNoPermissionError, userInfo: nil)
+            outError?.pointee = error
+        }
+        
+        override func coordinate(readingItemAt url: URL, options: NSFileCoordinator.ReadingOptions = [], error outError: NSErrorPointer, byAccessor reader: (URL) -> Void) {
+            let error = NSError(domain: NSCocoaErrorDomain, code: NSFileReadCorruptFileError, userInfo: nil)
             outError?.pointee = error
         }
     }
@@ -56,8 +61,51 @@ final class AsyncFileCoordinatorTests: XCTestCase {
     }
     
     
+    func testRead() async throws {
+        
+        let fileName = "hello"
+        let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        let url = documentDirectory.appendingPathComponent(fileName)
+        
+        let data = try await NSFileCoordinator().coordinate(readingDataAt: url)
+        
+        print(data)
+    }
     
-   
+    
+    func testReadError() async throws {
+        
+        let fileName = "helloo"
+        let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        let url = documentDirectory.appendingPathComponent(fileName)
+        
+        var error: Error?
+        
+        do {
+            let data = try await NSFileCoordinator().coordinate(readingDataAt: url)
+        } catch let err {
+            error = err
+        }
+        
+        XCTAssertNotNil(error)
+    }
+    
+    
+    func testReadSimulatedError() async throws {
+        let fileName = "hello"
+        let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        let url = documentDirectory.appendingPathComponent(fileName)
+        
+        var error: Error?
+        
+        do {
+            let data = try await NSFileCoordinatorStub().coordinate(readingDataAt: url)
+        } catch let err {
+            error = err
+        }
+        
+        XCTAssertNotNil(error)
+    }
     
     
 //    func testDelete() async throws {

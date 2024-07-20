@@ -29,9 +29,32 @@ extension NSFileCoordinator {
         }
     }
     
-    /*
+    // func coordinate(readingItemAt url: URL, options: NSFileCoordinator.ReadingOptions = [], error outError: NSErrorPointer, byAccessor reader: (URL) -> Void)
     
-    
+    func coordinate(readingDataAt url: URL) async throws -> Data {
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Data, Error>) in
+            var nsError: NSError?
+            self.coordinate(
+                readingItemAt: url, options: .withoutChanges, error: &nsError,
+                byAccessor: { (newURL: URL) -> Void in
+                    do {
+                        let data = try Data(contentsOf: newURL)
+                        continuation.resume(returning: data)
+                        return
+                    } catch {
+                        
+                        continuation.resume(throwing: error)
+                        return
+                    }
+                }
+            )
+            if let nsError = nsError {
+                
+                continuation.resume(throwing: nsError)
+                return
+            }
+        }
+    }
     
     // func coordinate(writingItemAt url: URL, options: NSFileCoordinator.WritingOptions = [], error outError: NSErrorPointer, byAccessor writer: (URL) -> Void)
     
@@ -59,34 +82,6 @@ extension NSFileCoordinator {
             }
         }
     }
-    
-    // func coordinate(readingItemAt url: URL, options: NSFileCoordinator.ReadingOptions = [], error outError: NSErrorPointer, byAccessor reader: (URL) -> Void)
-    
-    func coordinate(readingDataAt url: URL) async throws -> Data {
-        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Data, Error>) in
-            var nsError: NSError?
-            self.coordinate(
-                readingItemAt: url, options: .withoutChanges, error: &nsError,
-                byAccessor: { (newURL: URL) -> Void in
-                    do {
-                        let data = try Data(contentsOf: newURL)
-                        continuation.resume(returning: data)
-                        return
-                    } catch {
-                        
-                        continuation.resume(throwing: error)
-                        return
-                    }
-                }
-            )
-            if let nsError = nsError {
-                
-                continuation.resume(throwing: nsError)
-                return
-            }
-        }
-    }
-    */
     
 }
 

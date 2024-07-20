@@ -5,7 +5,7 @@ import Foundation
 
 extension NSFileCoordinator {
     // func coordinate(writingItemAt url: URL, options: NSFileCoordinator.WritingOptions = [], error outError: NSErrorPointer, byAccessor writer: (URL) -> Void) {
-    func coordinate(writing data: Data, at url: URL) async throws {
+    public func coordinate(writing data: Data, at url: URL) async throws {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             
             func handleWriting(newURL: URL) {
@@ -31,7 +31,7 @@ extension NSFileCoordinator {
     
     // func coordinate(readingItemAt url: URL, options: NSFileCoordinator.ReadingOptions = [], error outError: NSErrorPointer, byAccessor reader: (URL) -> Void)
     
-    func coordinate(readingDataAt url: URL) async throws -> Data {
+    public func coordinate(readingDataAt url: URL) async throws -> Data {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Data, Error>) in
             var nsError: NSError?
             self.coordinate(
@@ -58,7 +58,7 @@ extension NSFileCoordinator {
     
     // func coordinate(writingItemAt url: URL, options: NSFileCoordinator.WritingOptions = [], error outError: NSErrorPointer, byAccessor writer: (URL) -> Void)
     
-    func coordinate(deletingItemAt url: URL) async throws {
+    public func coordinate(deletingItemAt url: URL) async throws {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             var nsError: NSError?
             self.coordinate(

@@ -39,11 +39,6 @@
                BlueprintName = "AsyncFileCoordinatorTests"
                ReferencedContainer = "container:">
             </BuildableReference>
-            <SkippedTests>
-               <Test
-                  Identifier = "AsyncFileCoordinatorTests/testDelete()">
-               </Test>
-            </SkippedTests>
          </TestableReference>
       </Testables>
    </TestAction>

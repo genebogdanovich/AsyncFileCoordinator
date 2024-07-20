@@ -59,9 +59,6 @@ extension NSFileCoordinator {
     // func coordinate(writingItemAt url: URL, options: NSFileCoordinator.WritingOptions = [], error outError: NSErrorPointer, byAccessor writer: (URL) -> Void)
     
     func coordinate(deletingItemAt url: URL) async throws {
-        // fileExists is light so use it to avoid coordinate if the file doesn’t exist.
-        guard FileManager.default.fileExists(atPath: url.path) else { return }
-        
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             var nsError: NSError?
             self.coordinate(
@@ -82,6 +79,4 @@ extension NSFileCoordinator {
             }
         }
     }
-    
 }
-

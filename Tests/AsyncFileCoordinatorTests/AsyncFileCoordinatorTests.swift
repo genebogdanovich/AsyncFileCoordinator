@@ -4,6 +4,7 @@ import XCTest
 final class AsyncFileCoordinatorTests: XCTestCase {
     
     class NSFileCoordinatorStub: NSFileCoordinator {
+        
         override func coordinate(writingItemAt url: URL, options: NSFileCoordinator.WritingOptions = [], error outError: NSErrorPointer, byAccessor writer: (URL) -> Void) {
             let error = NSError(domain: NSCocoaErrorDomain, code: NSFileWriteNoPermissionError, userInfo: nil)
             outError?.pointee = error
@@ -15,10 +16,12 @@ final class AsyncFileCoordinatorTests: XCTestCase {
         }
     }
     
+    private let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+    
     func testWrite() async throws {
         let data = Data("testData".utf8)
-        let fileName = "hello"
-        let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        let fileName = "write"
+        
         let url = documentDirectory.appendingPathComponent(fileName)
         
         try await NSFileCoordinator().coordinate(writing: data, at: url)
@@ -26,7 +29,7 @@ final class AsyncFileCoordinatorTests: XCTestCase {
     
     func testWriteError() async throws {
         let data = Data("testData".utf8)
-        let fileName = "hello"
+        let fileName = "write"
         let urlWeDoNotHavePermissionToWriteTo = URL(fileURLWithPath: "/dev/null")
         
         let url = urlWeDoNotHavePermissionToWriteTo.appendingPathComponent(fileName)
@@ -45,8 +48,8 @@ final class AsyncFileCoordinatorTests: XCTestCase {
     
     func testWriteSimulatedError() async throws {
         let data = Data("testData".utf8)
-        let fileName = "hello"
-        let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        let fileName = "write"
+        
         let url = documentDirectory.appendingPathComponent(fileName)
         
         var error: Error?
@@ -63,26 +66,29 @@ final class AsyncFileCoordinatorTests: XCTestCase {
     
     func testRead() async throws {
         
-        let fileName = "hello"
-        let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        let fileName = "read"
+        
         let url = documentDirectory.appendingPathComponent(fileName)
+        let data = Data("testData".utf8)
         
-        let data = try await NSFileCoordinator().coordinate(readingDataAt: url)
+        try await NSFileCoordinator().coordinate(writing: data, at: url)
         
-        print(data)
+        let result = try await NSFileCoordinator().coordinate(readingDataAt: url)
+        
+        print(result)
     }
     
     
     func testReadError() async throws {
         
-        let fileName = "helloo"
-        let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        let fileName = "no-such-file"
+        
         let url = documentDirectory.appendingPathComponent(fileName)
         
         var error: Error?
         
         do {
-            let data = try await NSFileCoordinator().coordinate(readingDataAt: url)
+            let _ = try await NSFileCoordinator().coordinate(readingDataAt: url)
         } catch let err {
             error = err
         }
@@ -92,14 +98,14 @@ final class AsyncFileCoordinatorTests: XCTestCase {
     
     
     func testReadSimulatedError() async throws {
-        let fileName = "hello"
-        let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        let fileName = "read"
+        
         let url = documentDirectory.appendingPathComponent(fileName)
         
         var error: Error?
         
         do {
-            let data = try await NSFileCoordinatorStub().coordinate(readingDataAt: url)
+            let _ = try await NSFileCoordinatorStub().coordinate(readingDataAt: url)
         } catch let err {
             error = err
         }
@@ -108,14 +114,54 @@ final class AsyncFileCoordinatorTests: XCTestCase {
     }
     
     
-//    func testDelete() async throws {
-//        let fileName = "file"
-//        let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-//        let url = documentDirectory.appendingPathComponent(fileName)
-//        
-//        try await NSFileCoordinator().coordinate(deletingItemAt: url)
-//        
-//    }
+    func testDelete() async throws {
+        let data = Data("testData".utf8)
+        let fileName = "delete"
+        
+        let url = documentDirectory.appendingPathComponent(fileName)
+        
+        try await NSFileCoordinator().coordinate(writing: data, at: url)
+        
+        try await NSFileCoordinator().coordinate(deletingItemAt: url)
+    }
     
     
+    
+    func testDeleteError() async throws {
+        
+        let fileName = "no-such-file"
+        
+        let url = documentDirectory.appendingPathComponent(fileName)
+        
+        var error: Error?
+        
+        do {
+            try await NSFileCoordinator().coordinate(deletingItemAt: url)
+        } catch let err {
+            error = err
+        }
+        
+        XCTAssertNotNil(error)
+    }
+    
+    
+    func testDeleteSimulatedError() async throws {
+        
+        let data = Data("testData".utf8)
+        let fileName = "testDeleteSimulatedError"
+        
+        let url = documentDirectory.appendingPathComponent(fileName)
+        
+        try await NSFileCoordinator().coordinate(writing: data, at: url)
+        
+        var error: Error?
+        
+        do {
+            try await NSFileCoordinatorStub().coordinate(deletingItemAt: url)
+        } catch let err {
+            error = err
+        }
+        
+        XCTAssertNotNil(error)
+    }
 }

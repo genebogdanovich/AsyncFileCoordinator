@@ -3,7 +3,7 @@
 
 import Foundation
 
-struct FileCoordinator<FileCoordinatorType: FileCoordinatorProtocol> {
+public struct FileCoordinator<FileCoordinatorType: FileCoordinatorProtocol> {
     
     private let coordinator: FileCoordinatorType
     

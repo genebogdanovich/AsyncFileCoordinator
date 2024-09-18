@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol FileCoordinatorProtocol {
+public protocol FileCoordinatorProtocol {
     func coordinate(writingItemAt url: URL, options: NSFileCoordinator.WritingOptions, error outError: NSErrorPointer, byAccessor writer: (URL) -> Void)
     func coordinate(readingItemAt url: URL, options: NSFileCoordinator.ReadingOptions, error outError: NSErrorPointer, byAccessor reader: (URL) -> Void)
 }

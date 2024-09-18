@@ -3,7 +3,19 @@
 
 import Foundation
 
-extension NSFileCoordinator {
+struct FileCoordinator<FileCoordinatorType: FileCoordinatorProtocol> {
+    
+    private let coordinator: FileCoordinatorType
+    
+    internal init(coordinator: FileCoordinatorType) {
+        self.coordinator = coordinator
+    }
+    
+    public init() where FileCoordinatorType == NSFileCoordinator {
+        self.coordinator = NSFileCoordinator()
+    }
+    
+    
     // func coordinate(writingItemAt url: URL, options: NSFileCoordinator.WritingOptions = [], error outError: NSErrorPointer, byAccessor writer: (URL) -> Void) {
     public func coordinate(writing data: Data, at url: URL) async throws {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
@@ -21,7 +33,7 @@ extension NSFileCoordinator {
             
             var nsError: NSError?
             
-            self.coordinate(writingItemAt: url, options: .forReplacing, error: &nsError, byAccessor: handleWriting)
+            coordinator.coordinate(writingItemAt: url, options: .forReplacing, error: &nsError, byAccessor: handleWriting)
             if let nsError = nsError {
                 continuation.resume(throwing: nsError)
                 return
@@ -34,7 +46,7 @@ extension NSFileCoordinator {
     public func coordinate(readingDataAt url: URL) async throws -> Data {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Data, Error>) in
             var nsError: NSError?
-            self.coordinate(
+            coordinator.coordinate(
                 readingItemAt: url, options: .withoutChanges, error: &nsError,
                 byAccessor: { (newURL: URL) -> Void in
                     do {
@@ -61,7 +73,7 @@ extension NSFileCoordinator {
     public func coordinate(deletingItemAt url: URL) async throws {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             var nsError: NSError?
-            self.coordinate(
+            coordinator.coordinate(
                 writingItemAt: url, options: .forDeleting, error: &nsError, byAccessor: { (newURL: URL) -> Void in
                     do {
                         try FileManager.default.removeItem(atPath: newURL.path)

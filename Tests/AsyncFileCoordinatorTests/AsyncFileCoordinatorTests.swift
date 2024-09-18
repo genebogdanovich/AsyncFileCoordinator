@@ -24,7 +24,7 @@ final class AsyncFileCoordinatorTests: XCTestCase {
         
         let url = documentDirectory.appendingPathComponent(fileName)
         
-        try await NSFileCoordinator().coordinate(writing: data, at: url)
+        try await FileCoordinator().coordinate(writing: data, at: url)
     }
     
     func testWriteError() async throws {
@@ -38,7 +38,7 @@ final class AsyncFileCoordinatorTests: XCTestCase {
         var error: Error?
         
         do {
-            try await NSFileCoordinator().coordinate(writing: data, at: url)
+            try await FileCoordinator().coordinate(writing: data, at: url)
         } catch let err {
             error = err
         }
@@ -55,7 +55,7 @@ final class AsyncFileCoordinatorTests: XCTestCase {
         var error: Error?
         
         do {
-            try await NSFileCoordinatorStub().coordinate(writing: data, at: url)
+            try await FileCoordinator(coordinator: NSFileCoordinatorStub()).coordinate(writing: data, at: url)
         } catch let err {
             error = err
         }
@@ -71,9 +71,9 @@ final class AsyncFileCoordinatorTests: XCTestCase {
         let url = documentDirectory.appendingPathComponent(fileName)
         let data = Data("testData".utf8)
         
-        try await NSFileCoordinator().coordinate(writing: data, at: url)
+        try await FileCoordinator().coordinate(writing: data, at: url)
         
-        let result = try await NSFileCoordinator().coordinate(readingDataAt: url)
+        let result = try await FileCoordinator().coordinate(readingDataAt: url)
         
         print(result)
     }
@@ -88,7 +88,7 @@ final class AsyncFileCoordinatorTests: XCTestCase {
         var error: Error?
         
         do {
-            let _ = try await NSFileCoordinator().coordinate(readingDataAt: url)
+            let _ = try await FileCoordinator().coordinate(readingDataAt: url)
         } catch let err {
             error = err
         }
@@ -105,7 +105,7 @@ final class AsyncFileCoordinatorTests: XCTestCase {
         var error: Error?
         
         do {
-            let _ = try await NSFileCoordinatorStub().coordinate(readingDataAt: url)
+            let _ = try await FileCoordinator(coordinator: NSFileCoordinatorStub()).coordinate(readingDataAt: url)
         } catch let err {
             error = err
         }
@@ -120,9 +120,9 @@ final class AsyncFileCoordinatorTests: XCTestCase {
         
         let url = documentDirectory.appendingPathComponent(fileName)
         
-        try await NSFileCoordinator().coordinate(writing: data, at: url)
+        try await FileCoordinator().coordinate(writing: data, at: url)
         
-        try await NSFileCoordinator().coordinate(deletingItemAt: url)
+        try await FileCoordinator().coordinate(deletingItemAt: url)
     }
     
     
@@ -136,7 +136,7 @@ final class AsyncFileCoordinatorTests: XCTestCase {
         var error: Error?
         
         do {
-            try await NSFileCoordinator().coordinate(deletingItemAt: url)
+            try await FileCoordinator().coordinate(deletingItemAt: url)
         } catch let err {
             error = err
         }
@@ -152,12 +152,12 @@ final class AsyncFileCoordinatorTests: XCTestCase {
         
         let url = documentDirectory.appendingPathComponent(fileName)
         
-        try await NSFileCoordinator().coordinate(writing: data, at: url)
+        try await FileCoordinator().coordinate(writing: data, at: url)
         
         var error: Error?
         
         do {
-            try await NSFileCoordinatorStub().coordinate(deletingItemAt: url)
+            try await FileCoordinator(coordinator: NSFileCoordinatorStub()).coordinate(deletingItemAt: url)
         } catch let err {
             error = err
         }
